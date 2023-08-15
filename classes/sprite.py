@@ -1,3 +1,4 @@
+import random
 from pygame import Surface
 import pygame.image
 from typing import Optional
@@ -10,6 +11,7 @@ class Sprite:
     #     pass
 
     image: Surface
+    colored_image: Surface
     image_path: str  # FIXME implement path
     pos_x: float
     pos_y: float
@@ -39,8 +41,6 @@ class Sprite:
             raise ValueError(
                 "Needs either a size or a scale, you have provided none of those two."
             )
-        color_image = pygame.Surface(self.image.get_size()).convert_alpha()
-        color_image.fill
 
     @property
     def pos_x_end(self) -> float:
@@ -71,4 +71,18 @@ class Sprite:
         return False
 
     def draw(self, window: Surface):
-        window.blit(self.image, (self.pos_x, self.pos_y))
+        if hasattr(self, "colored_image"):
+            window.blit(self.colored_image, (self.pos_x, self.pos_y))
+        else:
+            window.blit(self.image, (self.pos_x, self.pos_y))
+
+    def change_color(self):
+        color = pygame.Color(
+            random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+        )
+        colored_image = pygame.Surface(self.image.get_size())
+        colored_image.fill(color)
+
+        final_image = self.image.copy()
+        final_image.blit(colored_image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        self.colored_image = final_image

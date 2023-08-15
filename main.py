@@ -1,5 +1,6 @@
 # Example file showing a basic pygame "game loop"
 import pygame
+import simpleaudio as sa
 from classes.sprite import Sprite
 
 
@@ -21,8 +22,10 @@ screen_rect = screen.get_rect()
 clock = pygame.time.Clock()
 running = True
 
-dvd_sprite = Sprite("assets/dvd-cropped.png", (400, 400), scale_factor=0.1)
-dvd_movement = pygame.Vector2(2, -2)  # .normalize()
+dvd_sprite = Sprite("assets/dvd-cropped.png", (400, 400), scale_factor=0.2)
+dvd_movement = pygame.Vector2(-2, -2)  # .normalize()
+
+yippie_sound = sa.WaveObject.from_wave_file("assets/yippie.wav")
 
 while running:
     screen_rect = screen.get_rect()
@@ -32,6 +35,7 @@ while running:
         Line(screen_rect.topright, screen_rect.bottomright),
         Line(screen_rect.topleft, screen_rect.bottomleft),
     )
+    corners_hit = 0
 
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -53,21 +57,33 @@ while running:
         ):
             # top line clipped
             dvd_movement = dvd_movement.reflect(pygame.Vector2(0, -1))
+            dvd_sprite.change_color()
+            corners_hit += 1
         if dvd_sprite.simulate_move(dvd_movement).clipline(
             screen_borders[1].point_a, screen_borders[1].point_b
         ):
             # bottom line clipped
+
             dvd_movement = dvd_movement.reflect(pygame.Vector2(0, -1))
+            dvd_sprite.change_color()
+            corners_hit += 1
         if dvd_sprite.simulate_move(dvd_movement).clipline(
             screen_borders[2].point_a, screen_borders[2].point_b
         ):
             # right line clipped
             dvd_movement = dvd_movement.reflect(pygame.Vector2(-1, 0))
+            dvd_sprite.change_color()
+            corners_hit += 1
         if dvd_sprite.simulate_move(dvd_movement).clipline(
             screen_borders[3].point_a, screen_borders[3].point_b
         ):
             # left line clipped
             dvd_movement = dvd_movement.reflect(pygame.Vector2(-1, 0))
+            dvd_sprite.change_color()
+            corners_hit += 1
+
+    if corners_hit > 1:
+        yippie_sound.play()
 
     # flip() the display to put your work on screen
     pygame.display.flip()
